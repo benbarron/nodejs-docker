@@ -1,0 +1,32 @@
+version: '3'
+
+networks: 
+  docker_network:
+
+services: 
+  npm:  
+    container_name: npm
+    image: node:latest
+    networks:
+      - docker_network
+
+  api: 
+    container_name: api
+    image: node:latest
+    networks:
+      - docker_network
+    depends_on: 
+      - mongodb
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ben
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb:/data/db
+    networks:
+      - docker_network
