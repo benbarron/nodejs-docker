@@ -1,10 +1,19 @@
 {
     "server": {
-        "port": 3000
+        "port": 8080
     },
-    "mongodb": {
-        "uri": "",
-        "username": "",
-        "password": ""
+    "mongo": {
+        "uri": "mongodb://ben:password@mongo:27017/admin?retryWrites=true&w=majority"
+    },
+    "redis": {
+        "appCache": {
+            "host": "app_cache",
+            "port": 6378
+        },
+        "sessionStorage": {
+            "host": "session_storage",
+            "port": 6379,
+            "secret": "secret"
+        }
     }
 }

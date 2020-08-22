@@ -1,22 +1,82 @@
 import 'reflect-metadata';
-import { InversifyExpressServer } from 'inversify-express-utils';
 import { Container } from 'inversify';
-import UserService from "./services/UserService";
-import HomeController from './controllers/HomeController';
+import { json, Application } from 'express';
+import { InversifyExpressServer } from 'inversify-express-utils';
+import { passwordReplacer } from './middleware/password-replacer';
+import { UserController } from './controllers/user-controller';
+import { CacheService } from './services/cache-service';
+import { UserService } from './services/user-service';
+import { AuthController } from './controllers/auth-controller';
+import { AuthService } from './services/auth-service';
+import { RootController } from './controllers/root-controller';
+import { ExceptionHandler } from './middleware/exception-handler';
+import { NotFoundHandler } from './middleware/notfound-handler';
+import { strategy, serializeUser, deserializeUser } from './middleware/passport-strategy';
+import connectRedis, { RedisStore } from 'connect-redis';
+import session, { SessionOptions } from 'express-session';
+import redis, { RedisClient } from 'redis';
 import config from 'config';
+import mongoose from 'mongoose';
+import passport from 'passport';
 
-const container: Container = new Container();
+const main = async () => {
+    const container: Container = new Container();
 
-container.bind<HomeController>('HomeController').to(HomeController);
-container.bind<UserService>('UserService').to(UserService);
+    container.bind<RootController>(RootController).toSelf();
+    container.bind<UserController>(UserController).toSelf();
+    container.bind<AuthController>(AuthController).toSelf();
+    container.bind<UserService>(UserService).toSelf();
+    container.bind<AuthService>(AuthService).toSelf();
+    container.bind<CacheService>(CacheService).toSelf();
 
-let server = new InversifyExpressServer(container);
-let port = config.get('server.port');
+    const server: InversifyExpressServer = new InversifyExpressServer(container);
+    const serverPort: number = config.get('server.port');
 
-server.setConfig((app) => {
+    const redisSessionSecret: string = config.get('redis.sessionStorage.secret');
 
-});
+    const redisSessionClient: RedisClient = redis.createClient({
+        host: config.get('redis.sessionStorage.host') as string,
+        port: config.get('redis.sessionStorage.port') as number
+    });
 
-server.build().listen(port, () => {
-    console.log(`Server started on port: ${port}`);
-});
+    const redisSessionStore: RedisStore = new (connectRedis(session))({
+        client: redisSessionClient,
+        ttl: 86400
+    });
+
+    const sessionOptions: SessionOptions = {
+        secret: redisSessionSecret,
+        resave: false,
+        saveUninitialized: true,
+        cookie: { secure: false },
+        store: redisSessionStore
+    };
+
+    server.setConfig((app: Application) => {
+        app.set('json replacer', passwordReplacer);
+        app.use(json());
+        app.use(session(sessionOptions));
+        app.use(passport.initialize());
+        app.use(passport.session());
+        passport.use(strategy);
+        passport.serializeUser(serializeUser);
+        passport.deserializeUser(deserializeUser);
+    });
+
+    server.setErrorConfig((app: Application) => {
+        app.use(ExceptionHandler);
+        app.use(NotFoundHandler);
+    });
+
+    await mongoose.connect(config.get('mongo.uri'), {
+        useUnifiedTopology: true,
+        useNewUrlParser: true,
+        useCreateIndex: true
+    });
+
+    server.build().listen(serverPort, () => {
+        console.log(`Server started on port: ${serverPort}`);
+    });
+};
+
+main();

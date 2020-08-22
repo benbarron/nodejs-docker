@@ -1,0 +1,53 @@
+version: '3'
+
+networks: 
+  docker_network:
+    driver: bridge
+
+services: 
+  express: 
+    container_name: express
+    image: node:latest
+    command: ['npm', 'run', 'start']
+    environment: 
+      NODE_ENV: production
+    working_dir: /var/www/app
+    volumes:
+      - .:/var/www/app
+    networks:
+      - docker_network
+    depends_on: 
+      - mongo
+    ports:
+      - 8080:8080
+  
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ben
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: app_db
+    volumes: 
+      - ./mongo:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - docker_network
+
+  app_cache:
+    container_name: app_cache
+    image: redis:alpine
+    restart: unless-stopped
+    tty: true
+    networks:
+      - docker_network
+
+  session_storage:
+    container_name: session_storage
+    image: redis:alpine
+    restart: unless-stopped
+    tty: true
+    networks:
+      - docker_network  
