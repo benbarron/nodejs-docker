@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { RedisException } from '../exceptions/redis-exception';
+import { CacheException } from '../exceptions/cache-exception';
 import redis from 'redis';
 import config from 'config';
 
@@ -17,7 +17,7 @@ export class CacheService {
     public async get(key: string) {
         return new Promise((resolve, reject) => {
             this.client.get(key, (error, data) => {
-                if (error) reject(new RedisException(501, error?.message));
+                if (error) reject(new CacheException(501, error?.message));
                 resolve(data);
             });
         });
@@ -26,7 +26,7 @@ export class CacheService {
     public async set(key: string, value: string, timeout: number = 3600) {
         return new Promise((resolve, reject) => {
             this.client.setex(key, timeout, value, (error) => {
-                if (error) reject(new RedisException(501, error.message));
+                if (error) reject(new CacheException(501, error.message));
                 resolve();
             });
         });

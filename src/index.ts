@@ -8,6 +8,7 @@ import { CacheService } from './services/cache-service';
 import { UserService } from './services/user-service';
 import { AuthController } from './controllers/auth-controller';
 import { AuthService } from './services/auth-service';
+import { NotificationService } from './services/notification-service';
 import { RootController } from './controllers/root-controller';
 import { ExceptionHandler } from './middleware/exception-handler';
 import { NotFoundHandler } from './middleware/notfound-handler';
@@ -18,6 +19,7 @@ import redis, { RedisClient } from 'redis';
 import config from 'config';
 import mongoose from 'mongoose';
 import passport from 'passport';
+import edge from 'edge.js';
 
 const main = async () => {
     const container: Container = new Container();
@@ -28,6 +30,7 @@ const main = async () => {
     container.bind<UserService>(UserService).toSelf();
     container.bind<AuthService>(AuthService).toSelf();
     container.bind<CacheService>(CacheService).toSelf();
+    container.bind<NotificationService>(NotificationService).toSelf();
 
     const server: InversifyExpressServer = new InversifyExpressServer(container);
     const serverPort: number = config.get('server.port');
@@ -61,6 +64,7 @@ const main = async () => {
         passport.use(strategy);
         passport.serializeUser(serializeUser);
         passport.deserializeUser(deserializeUser);
+        edge.registerViews(process.cwd() + '/src/templates');
     });
 
     server.setErrorConfig((app: Application) => {

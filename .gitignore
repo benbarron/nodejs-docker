@@ -1,2 +1,9 @@
 node_modules
+test
+tests
 mongo
+redis
+lib
+config
+.vscode
+.env

@@ -1,74 +1,77 @@
 version: '3'
 
-networks: 
-  docker_network:
-    driver: bridge
+networks:
+    docker_network:
+        driver: bridge
 
-services: 
-  express: 
-    container_name: express
-    image: node:latest
-    working_dir: /var/www/app
-    command: ['npm', 'run', 'dev']
-    environment: 
-      NODE_ENV: development
-    volumes:
-      - .:/var/www/app
-    networks:
-      - docker_network
-    depends_on: 
-      - mongo
-      - app_cache
-      - session_storage
-    ports:
-      - 8080:8080
+services:
+    express:
+        container_name: express
+        image: node:latest
+        working_dir: /var/www/app
+        command: ['npm', 'run', 'dev']
+        environment:
+            NODE_ENV: development
+        volumes:
+            - .:/var/www/app
+        networks:
+            - docker_network
+        depends_on:
+            - mongo
+            - app_cache
+            - session_storage
+        ports:
+            - 8080:8080
 
-  mongo_admin: 
-    container_name: mongo_admin
-    image: mongo-express:latest
-    restart: always
-    networks:
-      - docker_network
-    depends_on: 
-      - mongo
-    ports:
-      - 8081:8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ben
-      ME_CONFIG_MONGODB_ADMINPASSWORD: password
-  
-  mongo:
-    container_name: mongo
-    image: mongo:latest
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ben
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: app_db
-    volumes: 
-      - ./mongo:/data/db
-    ports:
-      - 27017:27017
-    networks:
-      - docker_network
+    # mongo_admin:
+    #     container_name: mongo_admin
+    #     image: mongo-express:latest
+    #     restart: always
+    #     networks:
+    #         - docker_network
+    #     depends_on:
+    #         - mongo
+    #     ports:
+    #         - 8081:8081
+    #     links:
+    #         - mongo
+    #     environment:
+    #         ME_CONFIG_MONGODB_SERVER: mongo
+    #         ME_CONFIG_MONGODB_ADMINUSERNAME: ben
+    #         ME_CONFIG_MONGODB_ADMINPASSWORD: password
 
-  app_cache:
-    container_name: app_cache
-    image: redis:alpine
-    restart: unless-stopped
-    tty: true
-    command: --port 6378
-    ports: 
-      - 6378:6378
-    networks:
-      - docker_network
+    mongo:
+        container_name: mongo
+        image: mongo:latest
+        restart: always
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ben
+            MONGO_INITDB_ROOT_PASSWORD: password
+            MONGO_INITDB_DATABASE: app_db
+        volumes:
+            - ./mongo:/data/db
+        ports:
+            - 27017:27017
+        networks:
+            - docker_network
 
-  session_storage:
-    container_name: session_storage
-    image: redis:alpine
-    restart: unless-stopped
-    tty: true
-    ports: 
-      - 6379:6379
-    networks:
-      - docker_network  
+    app_cache:
+        container_name: app_cache
+        image: redis:alpine
+        restart: unless-stopped
+        tty: true
+        command: --port 6378
+        ports:
+            - 6378:6378
+        networks:
+            - docker_network
+
+    session_storage:
+        container_name: session_storage
+        image: redis:alpine
+        restart: unless-stopped
+        tty: true
+        ports:
+            - 6379:6379
+        networks:
+            - docker_network

@@ -7,7 +7,7 @@
         "stop": "pm2 stop 0",
         "server:watch": "nodemon .",
         "compile:watch": "tsc -w",
-        "compile": "tsc .",
+        "compile": "tsc -p .",
         "dev": "concurrently \"npm run compile:watch\" \"npm run server:watch\""
     },
     "author": "",
@@ -16,16 +16,19 @@
         "bcryptjs": "^2.4.3",
         "config": "^3.3.1",
         "connect-redis": "^5.0.0",
+        "edge.js": "^1.1.4",
         "express": "^4.17.1",
         "express-session": "^1.17.1",
         "inversify": "^5.0.1",
         "inversify-express-utils": "^6.3.2",
         "mongoose": "^5.10.0",
+        "nodemailer": "^6.4.11",
         "passport": "^0.4.1",
         "passport-local": "^1.0.0",
         "pm2": "^4.4.1",
         "redis": "^3.0.2",
-        "reflect-metadata": "^0.1.13"
+        "reflect-metadata": "^0.1.13",
+        "uuid": "^8.3.0"
     },
     "devDependencies": {
         "@types/bcryptjs": "^2.4.2",
@@ -35,11 +38,13 @@
         "@types/express-session": "^1.17.0",
         "@types/mongoose": "^5.7.36",
         "@types/node": "^14.6.0",
+        "@types/nodemailer": "^6.4.0",
         "@types/passport": "^1.0.4",
         "@types/passport-local": "^1.0.33",
         "@types/redis": "^2.8.25",
+        "@types/uuid": "^8.3.0",
+        "concurrently": "^5.3.0",
         "nodemon": "^2.0.4",
-        "typescript": "^3.9.7",
-        "concurrently": "^5.3.0"
+        "typescript": "^3.9.7"
     }
 }

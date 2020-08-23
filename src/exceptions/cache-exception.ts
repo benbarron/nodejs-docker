@@ -1,7 +1,7 @@
 import { BaseException } from './base-exception';
 
-export class RedisException extends BaseException {
+export class CacheException extends BaseException {
     constructor(status: number, message: string, data: any = {}) {
-        super('RedisException', status, message, data);
+        super('CacheException', status, message, data);
     }
 }

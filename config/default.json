@@ -15,5 +15,10 @@
             "port": 6379,
             "secret": "secret"
         }
+    },
+    "email": {
+        "service": "outlook",
+        "user": "<>@<>.com",
+        "password": "<>"
     }
 }
